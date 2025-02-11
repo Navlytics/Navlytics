@@ -65,7 +65,7 @@ Bei Fragen oder Anregungen können Sie sich gerne an uns wenden.
 
 <div class="horizontalflex">
 <div class="verticalflex">
-<b>Kagan Demirer</b>
+<b>Kagan Demirer</b><br>
 
 <img src="https://avatars.githubusercontent.com/u/94038933?v=4" class="profile-picture" alt="Kagan Demirer Profilepicture">
 
@@ -74,7 +74,7 @@ Mail: privat@kagandemirer.de</br>
 [GitHub Profile](https://github.com/KaganDemirer)
 </div>
 <div class="verticalflex">
-<b>Claudius Laur</b>
+<b>Claudius Laur</b><br>
 
 <img src="https://avatars.githubusercontent.com/u/121173722?v=4" class="profile-picture" alt="Claudius Laur Profilepicture">
 
