@@ -10,6 +10,7 @@ let highlightElementFrom = null;
 let highlightElementTo = null;
 let clicksStatistics = {};
 let showBotPaths = true;
+let resolutions = []; // Add this variable to store resolutions
 
 // Wait for the DOM to be loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -657,10 +658,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeatmap();
     setInterval(updateHeatmap, 1);
 
-    const widthMin = document.getElementById('width-min');
-    const widthMax = document.getElementById('width-max');
-    const heightMin = document.getElementById('height-min');
-    const heightMax = document.getElementById('height-max');
+    const minWidth = document.getElementById('width-min');
+    const maxWidth = document.getElementById('width-max');
+    const minHeight = document.getElementById('height-min');
+    const maxHeight = document.getElementById('height-max');
     const widthValue = document.getElementById('width-value');
     const heightValue = document.getElementById('height-value');
 
@@ -687,12 +688,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateHeatmapForResolution() {
         const widthRange = {
-            min: parseInt(widthMin.value),
-            max: parseInt(widthMax.value)
+            min: parseInt(minWidth.value),
+            max: parseInt(maxWidth.value)
         };
         const heightRange = {
-            min: parseInt(heightMin.value),
-            max: parseInt(heightMax.value)
+            min: parseInt(minHeight.value),
+            max: parseInt(maxHeight.value)
         };
 
         fetch(`/heat-map?widthMin=${widthRange.min}&widthMax=${widthRange.max}&heightMin=${heightRange.min}&heightMax=${heightRange.max}`)
@@ -711,15 +712,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateIframeSize() {
-        const widthMax = document.getElementById('width-max').value;
-        const heightMax = document.getElementById('height-max').value;
+        const maxWidth = document.getElementById('width-max').value;
+        const maxHeight = document.getElementById('height-max').value;
 
         const iframe = document.querySelector('iframe');
         const iframeContainer = document.getElementById('uiux-frame');
 
         // Setze die maximale Größe des iframes
-        iframe.style.width = `${widthMax}px`;
-        iframe.style.height = `${heightMax}px`;
+        iframe.style.width = `${maxWidth}px`;
+        iframe.style.height = `${maxHeight}px`;
 
         // Zentriere das iframe im Container
         iframe.style.position = 'absolute';
@@ -730,9 +731,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const containerWidth = iframeContainer.offsetWidth;
         const containerHeight = iframeContainer.offsetHeight;
 
-        if (widthMax > containerWidth || heightMax > containerHeight) {
-            const widthRatio = containerWidth / widthMax;
-            const heightRatio = containerHeight / heightMax;
+        if (maxWidth > containerWidth || maxHeight > containerHeight) {
+            const widthRatio = containerWidth / maxWidth;
+            const heightRatio = containerHeight / maxHeight;
             const zoomFactor = Math.min(widthRatio, heightRatio);
             iframe.style.zoom = zoomFactor;
             iframe.style.transform = 'translate(-50%, -50%)';
@@ -743,10 +744,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Passe auch die Größe des Heatmap-Canvas an
         const heatmapCanvas = document.getElementById('heatmap');
-        heatmapCanvas.width = widthMax;
-        heatmapCanvas.height = heightMax;
-        heatmapCanvas.style.width = `${widthMax}px`;
-        heatmapCanvas.style.height = `${heightMax}px`;
+        heatmapCanvas.width = maxWidth;
+        heatmapCanvas.height = maxHeight;
+        heatmapCanvas.style.width = `${maxWidth}px`;
+        heatmapCanvas.style.height = `${maxHeight}px`;
         heatmapCanvas.style.position = 'absolute';
         heatmapCanvas.style.left = '50%';
         heatmapCanvas.style.top = '50%';
@@ -755,24 +756,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event Listener für die Slider
-    widthMin.addEventListener('input', () => {
-        updateSliderRange(widthMin, widthMax, widthValue);
+    minWidth.addEventListener('input', () => {
+        updateSliderRange(minWidth, maxWidth, widthValue);
     });
-    widthMax.addEventListener('input', () => {
-        updateSliderRange(widthMin, widthMax, widthValue);
+    maxWidth.addEventListener('input', () => {
+        updateSliderRange(minWidth, maxWidth, widthValue);
         updateIframeSize();
     });
-    heightMin.addEventListener('input', () => {
-        updateSliderRange(heightMin, heightMax, heightValue);
+    minHeight.addEventListener('input', () => {
+        updateSliderRange(minHeight, maxHeight, heightValue);
     });
-    heightMax.addEventListener('input', () => {
-        updateSliderRange(heightMin, heightMax, heightValue);
+    maxHeight.addEventListener('input', () => {
+        updateSliderRange(minHeight, maxHeight, heightValue);
         updateIframeSize();
     });
 
     // Initiale Aktualisierung
-    updateSliderRange(widthMin, widthMax, widthValue);
-    updateSliderRange(heightMin, heightMax, heightValue);
+    updateSliderRange(minWidth, maxWidth, widthValue);
+    updateSliderRange(minHeight, maxHeight, heightValue);
     updateIframeSize();
 
     document.getElementById('show-bots').addEventListener('change', function (e) {
@@ -782,13 +783,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Neue Funktionen: Speichern und Laden von Auflösungen
     async function saveResolution() {
-        const width = document.getElementById('width-max').value;
-        const height = document.getElementById('height-max').value;
+        const widthMin = document.getElementById('width-min').value;
+        const widthMax = document.getElementById('width-max').value;
+        const heightMin = document.getElementById('height-min').value;
+        const heightMax = document.getElementById('height-max').value;
         try {
             await fetch('/save-resolution', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ width, height })
+                body: JSON.stringify({ widthMin, widthMax, heightMin, heightMax })
             });
             loadSavedResolutions();
         } catch (error) {
@@ -799,13 +802,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadSavedResolutions() {
         try {
             const response = await fetch('/saved-resolutions');
-            const resolutions = await response.json();
+            resolutions = await response.json(); // Store the loaded resolutions
             const selector = document.getElementById('resolution-selector');
             selector.innerHTML = '';
             resolutions.forEach((res, index) => {
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = `${res.width}px x ${res.height}px`;
+                option.textContent = `${res.widthMin}px - ${res.widthMax}px | ${res.heightMin}px - ${res.heightMax}px`;
                 selector.appendChild(option);
             });
         } catch (error) {
@@ -818,13 +821,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listener für den Selector
     document.getElementById('resolution-selector').addEventListener('change', event => {
-        // Beim Auswählen: Update der Slider und iFrame Größe
-        const selectedOption = event.target.options[event.target.selectedIndex].textContent;
-        const [width, height] = selectedOption.split(' x ').map(s => s.replace('px', '').trim());
-        document.getElementById('width-max').value = width;
-        document.getElementById('height-max').value = height;
-        updateSliderRange(document.getElementById('width-min'), document.getElementById('width-max'), document.getElementById('width-value'));
-        updateSliderRange(document.getElementById('height-min'), document.getElementById('height-max'), document.getElementById('height-value'));
+        const selectedIndex = event.target.value;
+        if (!selectedIndex) return;
+        const res = resolutions[selectedIndex];
+
+        document.getElementById('width-min').value = res.widthMin;
+        document.getElementById('width-max').value = res.widthMax;
+        document.getElementById('height-min').value = res.heightMin;
+        document.getElementById('height-max').value = res.heightMax;
+        
+        updateSliderRange(minWidth, maxWidth, widthValue);
+        updateSliderRange(minHeight, maxHeight, heightValue);
         updateIframeSize();
     });
 

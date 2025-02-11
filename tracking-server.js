@@ -1,14 +1,15 @@
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
 const express = require('express'); // Added to enable static middleware
 
+// Update file paths to be relative to the server location
 const resolutionsFile = 'resolutions.json';
 const heatMapFile = 'heat-map.json';
 
 function initializeTrackingServer(io, app, port = 8000) {
     // Serve static assets (e.g. CSS, JS, images) from a subfolder under /monitoring
     app.use('/monitoring/static', express.static(path.join(__dirname, 'monitoring', 'static')));
+    app.use(express.json());
 
     // Serve the index.html for /monitoring and replace {PORT} with the actual port
     app.get('/monitoring', (_, res) => {
@@ -25,7 +26,7 @@ function initializeTrackingServer(io, app, port = 8000) {
     // GET alle gespeicherten Auflösungen
     app.get('/saved-resolutions', (req, res) => {
         if (!fs.existsSync(resolutionsFile)) {
-            const defaultResolution = [{ width: 1920, height: 1080 }];
+            const defaultResolution = [{ widthMin: 0, widthMax: 1920, heightMin: 0, heightMax: 1080 }];
             fs.writeFileSync(resolutionsFile, JSON.stringify(defaultResolution, null, 2));
             return res.json(defaultResolution);
         }
@@ -37,19 +38,26 @@ function initializeTrackingServer(io, app, port = 8000) {
     
     // POST neue Auflösung speichern
     app.post('/save-resolution', (req, res) => {
-        const { width, height } = req.body;
-        if (!width || !height) {
-            return res.status(400).json({ error: 'Width and height are required' });
+        const { widthMin, widthMax, heightMin, heightMax } = req.body;
+        
+        if (!widthMin || !widthMax || !heightMin || !heightMax) {
+            return res.status(400).json({ error: 'Missing required fields.' });
         }
-        fs.readFile(resolutionsFile, 'utf8', (err, data) => {
-            if (err) return res.status(500).json({ error: 'Could not read file' });
-            const resolutions = JSON.parse(data);
-            resolutions.push({ width, height });
-            fs.writeFile(resolutionsFile, JSON.stringify(resolutions, null, 2), err => {
-                if (err) return res.status(500).json({ error: 'Could not save resolution' });
-                res.json({ success: true });
-            });
-        });
+
+        try {
+            let resolutions = [];
+            if (fs.existsSync(resolutionsFile)) {
+                const data = fs.readFileSync(resolutionsFile, 'utf8');
+                resolutions = JSON.parse(data);
+            }
+
+            resolutions.push({ widthMin, widthMax, heightMin, heightMax });
+            fs.writeFileSync(resolutionsFile, JSON.stringify(resolutions, null, 2));
+            return res.status(200).json({ success: true });
+        } catch (error) {
+            console.error('Error saving resolution:', error);
+            return res.status(500).json({ error: 'Failed to save resolution' });
+        }
     });
 
     // Funktion zum sicheren Lesen der JSON-Datei

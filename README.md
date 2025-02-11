@@ -32,6 +32,9 @@ Führe die folgenden Schritte aus, um Navlytics in dein Projekt zu integrieren:
 
 Nach der Installation ist das Dashboard unter `/monitoring` erreichbar.
 
+## Wichtig: Vergabe von IDs
+Achte darauf, dass jedes HTML-Element, das getrackt werden soll, eine eindeutige ID besitzt. Die Auswertung und das Tracking basieren auf diesen IDs, um Elemente eindeutig identifizieren zu können.
+
 ## Features
 
 - **Maus-Tracking**: Erfasst Mausbewegungen, Klicks und Verweildauer.
@@ -48,7 +51,7 @@ Nach der Installation ist das Dashboard unter `/monitoring` erreichbar.
    ```
 
 2. **Zugriff auf das Dashboard**
-   Öffne deinen Browser und rufe `http://localhost:3000/monitoring` auf.
+   Öffne deinen Browser und rufe `http://localhost:{PORT}/monitoring` auf.
 
 3. **Nutzerinteraktionen auswerten**
    - Überprüfe Heatmaps zur Identifikation häufig genutzter Elemente.
@@ -83,6 +86,3 @@ Mail: privat@claudiuslaur.de</br>
 [GitHub Profile](https://github.com/DrmedAllel)
 </div>
 </div>
-
-</br>
-</br>
