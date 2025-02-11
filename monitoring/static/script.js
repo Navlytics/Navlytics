@@ -420,7 +420,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             drawPath(path, target, previousID, clickPosition, resolution, bot);
 
-            const element_offset = iframe.contentWindow.document.getElementById(clickedObject.id).getBoundingClientRect();
+            const element = iframe.contentWindow.document.getElementById(clickedObject.id);
+            if (!element) return;
+            const element_offset = element.getBoundingClientRect();
 
             const x_click = (clickPosition.relativeClickPosition.x * element_offset.width) + element_offset.left;
             const y_click = (clickPosition.relativeClickPosition.y * element_offset.height) + element_offset.top;
@@ -511,10 +513,11 @@ document.addEventListener('DOMContentLoaded', () => {
     //add click event listener to each card
     cards.forEach(card => {
         card.addEventListener('click', event => {
-            // if clicked on input in the card return
-            if (event.target.tagName === 'INPUT') {
+            // if clicked on something else then the card return
+            if (event.target !== card) {
                 return;
             }
+            
             //get all elements inside the card with the class 'further_information'
             const further_information = card.querySelectorAll('.further_information');
             //toggle the display of the elements
@@ -634,6 +637,19 @@ document.addEventListener('DOMContentLoaded', () => {
             barContainer.appendChild(bar);
             barContainer.appendChild(popup);
             container.appendChild(barContainer);
+            bar.addEventListener('click', () => {
+                const iframeEl = document.querySelector('iframe');
+                const selectedElement = iframeEl.contentWindow.document.querySelector(value.path);
+                if (selectedElement) {
+                    clickedObject = {
+                        path: getElementPath(selectedElement),
+                        tagName: selectedElement.tagName,
+                        id: selectedElement.id,
+                        className: selectedElement.className
+                    };
+                    updateInformation(selectedElement);
+                }
+            });
         });
     }
 
