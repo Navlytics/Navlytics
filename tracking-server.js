@@ -1,9 +1,56 @@
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
+const express = require('express'); // Added to enable static middleware
 
-function initializeTrackingServer(io, app, port) {
-    const heatMapFile = path.join(__dirname, 'heat-map.json');
+const resolutionsFile = 'resolutions.json';
+const heatMapFile = 'heat-map.json';
+
+function initializeTrackingServer(io, app, port = 8000) {
+    // Serve static assets (e.g. CSS, JS, images) from a subfolder under /monitoring
+    app.use('/monitoring/static', express.static(path.join(__dirname, 'monitoring', 'static')));
+
+    // Serve the index.html for /monitoring and replace {PORT} with the actual port
+    app.get('/monitoring', (_, res) => {
+        const indexPath = path.join(__dirname, 'monitoring', 'index.html');
+        fs.readFile(indexPath, 'utf8', (err, data) => {
+            if (err) {
+                return res.status(500).send('Fehler beim Laden der Überwachungsseite.');
+            }
+            const updatedData = data.replace(/{PORT}/g, port);
+            res.send(updatedData);
+        });
+    });
+
+    // GET alle gespeicherten Auflösungen
+    app.get('/saved-resolutions', (req, res) => {
+        if (!fs.existsSync(resolutionsFile)) {
+            const defaultResolution = [{ width: 1920, height: 1080 }];
+            fs.writeFileSync(resolutionsFile, JSON.stringify(defaultResolution, null, 2));
+            return res.json(defaultResolution);
+        }
+        fs.readFile(resolutionsFile, 'utf8', (err, data) => {
+            if (err) return res.status(500).json({ error: 'Could not read file' });
+            res.json(JSON.parse(data));
+        });
+    });
+    
+    // POST neue Auflösung speichern
+    app.post('/save-resolution', (req, res) => {
+        const { width, height } = req.body;
+        if (!width || !height) {
+            return res.status(400).json({ error: 'Width and height are required' });
+        }
+        fs.readFile(resolutionsFile, 'utf8', (err, data) => {
+            if (err) return res.status(500).json({ error: 'Could not read file' });
+            const resolutions = JSON.parse(data);
+            resolutions.push({ width, height });
+            fs.writeFile(resolutionsFile, JSON.stringify(resolutions, null, 2), err => {
+                if (err) return res.status(500).json({ error: 'Could not save resolution' });
+                res.json({ success: true });
+            });
+        });
+    });
 
     // Funktion zum sicheren Lesen der JSON-Datei
     function safeReadJSON(filePath) {
@@ -100,16 +147,6 @@ function initializeTrackingServer(io, app, port) {
         }
         
         res.json(heatMapData);
-    });
-
-
-    // Dynamisch generierte Monitoring-Seite
-    app.get('/monitoring', (req, res) => {
-        res.type('html');
-        const html = fs.readFileSync('monitoring/index.html', 'utf8');
-        const renderedHtml = html.replace('{PORT}', port);
-        
-        res.send(renderedHtml);
     });
 
     // Dynamisch generiertes Tracking-Skript

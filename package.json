@@ -1,0 +1,53 @@
+{
+  "name": "navlytics",
+  "version": "1.0.0",
+  "description": "Navlytics is a framework for analyzing user behavior on websites. It provides heatmaps, click statistics, and accessibility analysis to optimize the user experience.",
+  "main": "tracking-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Navlytics/Navlytics.git"
+  },
+  "keywords": [
+    "User",
+    "Tracking",
+    "UX",
+    "Analytics",
+    "Heatmaps",
+    "Click",
+    "Tracking",
+    "Mouse",
+    "Movement",
+    "Analysis",
+    "User",
+    "Behavior",
+    "Insights",
+    "Navigation",
+    "Analytics",
+    "Accessibility",
+    "Analysis",
+    "Web",
+    "Optimization",
+    "Bot",
+    "Detection",
+    "Interaction",
+    "Monitoring",
+    "User",
+    "Flow",
+    "Analysis",
+    "Session",
+    "Tracking",
+    "A/B",
+    "Testing",
+    "Frontend",
+    "Optimization"
+  ],
+  "author": "Kagan Demirer, Claudius Laur",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Navlytics/Navlytics/issues"
+  },
+  "homepage": "https://github.com/Navlytics/Navlytics#readme"
+}
