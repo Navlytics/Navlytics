@@ -86,28 +86,3 @@ Mail: privat@claudiuslaur.de</br>
 
 </br>
 </br>
-
-<style>
-.profile-picture {
-    border-radius: 50%;
-    width: 75px;
-    margin-bottom: 10px;
-}
-
-.horizontalflex {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 20%;
-}
-
-.verticalflex {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.note {
-    font-size: 10px;
-}
-</style>
